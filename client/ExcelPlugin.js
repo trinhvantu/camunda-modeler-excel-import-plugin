@@ -226,22 +226,17 @@ export default class ExcelPlugin extends PureComponent {
         return sheet;
       });
 
-      // (1) get excel sheet contents
-      const excelSheet = await fileSystem.readFile(inputFile.path, {
-        encoding: false
-      });
+      const arrayBuffer = await inputFile.arrayBuffer();
 
-      const {
-        contents
-      } = excelSheet;
+      const buffer = Buffer.from(arrayBuffer);
 
-      const isMulti = await isMultiSheet(contents);
+      const isMulti = await isMultiSheet(buffer);
 
       // (2) convert to DMN 1.3
       // const xml2 = await this.convertXlsxFromApi(options);
       const xml = await this.convertXlsx({
         ...options,
-        buffer: contents,
+        buffer: buffer,
         sheets
       });
 
@@ -272,17 +267,11 @@ export default class ExcelPlugin extends PureComponent {
       _getGlobal
     } = this.props;
 
-    const fileSystem = _getGlobal('fileSystem');
+    const buffer = await file.arrayBuffer();
 
-    const excelSheet = await fileSystem.readFile(file.path, {
-      encoding: false
-    });
+    const excelSheet = Buffer.from(buffer);
 
-    const {
-      contents
-    } = excelSheet;
-
-    const dmnContents = await parseDmn({ buffer: contents });
+    const dmnContents = await parseDmn({ buffer: excelSheet });
 
     return dmnContents;
   }
